@@ -1,0 +1,7 @@
+
+recursive-include . *.py
+
+recursive-include Configs *
+recursive-include Models *
+recursive-include Utils *
+recursive-include Modules *
