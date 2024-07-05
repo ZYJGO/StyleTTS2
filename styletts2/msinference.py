@@ -26,9 +26,10 @@ import torchaudio
 import librosa
 from nltk.tokenize import word_tokenize
 
-from models import *
-from utils import *
-from text_utils import TextCleaner
+from styletts2.models import *
+from styletts2.utils import *
+from styletts2.text_utils import TextCleaner
+import pkg_resources
 textclenaer = TextCleaner()
 
 
@@ -60,6 +61,9 @@ def compute_style(path):
 
     return torch.cat([ref_s, ref_p], dim=1)
 
+def get_full_path(package_name, relative_path):
+    return pkg_resources.resource_filename(package_name, relative_path)
+
 device = 'cpu'
 if torch.cuda.is_available():
     device = 'cuda'
@@ -73,22 +77,22 @@ global_phonemizer = phonemizer.backend.EspeakBackend(language='en-us', preserve_
 # phonemizer = Phonemizer.from_checkpoint(str(cached_path('https://public-asai-dl-models.s3.eu-central-1.amazonaws.com/DeepPhonemizer/en_us_cmudict_ipa_forward.pt')))
 
 
-# config = yaml.safe_load(open("Models/LibriTTS/config.yml"))
-config = yaml.safe_load(open(str(cached_path("hf://yl4579/StyleTTS2-LibriTTS/Models/LibriTTS/config.yml"))))
+config = config = yaml.safe_load(open(pkg_resources.resource_filename('styletts2', 'Models/LibriTTS/config.yml'), 'r'))
+#config = yaml.safe_load(open(str(cached_path("hf://yl4579/StyleTTS2-LibriTTS/Models/LibriTTS/config.yml"))))
 
 # load pretrained ASR model
-ASR_config = config.get('ASR_config', False)
-ASR_path = config.get('ASR_path', False)
-text_aligner = load_ASR_models(ASR_path, ASR_config)
+ASR_config_path = get_full_path('styletts2', config.get('ASR_config', ''))
+ASR_model_path = get_full_path('styletts2', config.get('ASR_path', ''))
+text_aligner = load_ASR_models(ASR_model_path, ASR_config_path)
 
 # load pretrained F0 model
-F0_path = config.get('F0_path', False)
-pitch_extractor = load_F0_models(F0_path)
+F0_model_path = get_full_path('styletts2', config.get('F0_path', ''))
+pitch_extractor = load_F0_models(F0_model_path)
 
 # load BERT model
 from Utils.PLBERT.util import load_plbert
-BERT_path = config.get('PLBERT_dir', False)
-plbert = load_plbert(BERT_path)
+BERT_dir_path = get_full_path('styletts2', config.get('PLBERT_dir', ''))
+plbert = load_plbert(BERT_dir_path)
 
 model_params = recursive_munch(config['model_params'])
 model = build_model(model_params, text_aligner, pitch_extractor, plbert)
@@ -117,7 +121,7 @@ for key in model:
 #                 _load(params[key], model[key])
 _ = [model[key].eval() for key in model]
 
-from Modules.diffusion.sampler import DiffusionSampler, ADPM2Sampler, KarrasSchedule
+from styletts2.Modules.diffusion.sampler import DiffusionSampler, ADPM2Sampler, KarrasSchedule
 
 sampler = DiffusionSampler(
     model.diffusion.diffusion,
