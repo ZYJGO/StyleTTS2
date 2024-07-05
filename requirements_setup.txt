@@ -21,3 +21,4 @@ tortoise-tts
 flask 
 markdown
 flask-cors
+setuptools
