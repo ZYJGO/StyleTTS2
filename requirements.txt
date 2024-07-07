@@ -14,7 +14,6 @@ einops-exts
 tqdm
 typing
 typing-extensions
-gradio
 phonemizer
 cached-path
 tortoise-tts 
