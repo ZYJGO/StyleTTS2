@@ -90,7 +90,7 @@ F0_model_path = get_full_path('styletts2', config.get('F0_path', ''))
 pitch_extractor = load_F0_models(F0_model_path)
 
 # load BERT model
-from Utils.PLBERT.util import load_plbert
+from styletts2.Utils.PLBERT.util import load_plbert
 BERT_dir_path = get_full_path('styletts2', config.get('PLBERT_dir', ''))
 plbert = load_plbert(BERT_dir_path)
 
